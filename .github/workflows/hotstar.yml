@@ -44,9 +44,15 @@ jobs:
           name: myapp
 
       # 6. Deploy WAR via Tomcat Manager
-      - name: Deploy to Tomcat
-        run: |
-          WAR_FILE=$(ls *.war)
-          echo "Deploying $WAR_FILE to Tomcat..."
-          curl -v --upload-file "$WAR_FILE" \
-            "http://${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }}@${{ secrets.TOMCAT_HOST }}/manager/text/deploy?path=/myapp&update=true"
+     - name: Deploy to Tomcat
+  run: |
+    WAR_FILE=$(ls *.war)
+    echo "Deploying $WAR_FILE to Tomcat..."
+
+    curl -v \
+      --fail \
+      --connect-timeout 10 \
+      --max-time 120 \
+      -u "${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }}" \
+      --upload-file "$WAR_FILE" \
+      "http://${{ secrets.TOMCAT_HOST }}/manager/text/deploy?path=/myapp&update=true"
