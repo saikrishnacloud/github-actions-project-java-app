@@ -2,7 +2,7 @@ name: Java CI/CD Pipeline to Tomcat
  
 on:
   push:
-    branches:
+    branches: 
       - main
 
 jobs:
