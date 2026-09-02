@@ -68,7 +68,7 @@ jobs:
 
           sonar-scanner -v
 
-           # 7. Run SonarQube Analysis
+      # 7. Run SonarQube Analysis
       - name: SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
