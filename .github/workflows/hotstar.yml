@@ -68,19 +68,48 @@ jobs:
 
           sonar-scanner -v
 
-      # 7. Run SonarQube Analysis
+           # 7. Run SonarQube Analysis
       - name: SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: |
+
+          echo "Checking SonarQube configuration..."
+
+          if [ -z "$SONAR_HOST_URL" ]; then
+            echo "ERROR: SONAR_HOST_URL secret is not configured."
+            exit 1
+          fi
+
+          # Add http:// automatically if no scheme is provided
+          if [[ "$SONAR_HOST_URL" != http://* && "$SONAR_HOST_URL" != https://* ]]; then
+            SONAR_HOST_URL="http://$SONAR_HOST_URL"
+          fi
+
+          echo "SonarQube URL: $SONAR_HOST_URL"
+
+          echo "Checking SonarQube server..."
+
+          curl \
+            --fail \
+            --connect-timeout 10 \
+            --max-time 30 \
+            "$SONAR_HOST_URL/api/system/status"
+
+          echo "SonarQube server is reachable."
+
+          echo "Running SonarQube analysis..."
+
           sonar-scanner \
             -Dsonar.projectKey=hotstar-app \
             -Dsonar.projectName="Hotstar Java Application" \
             -Dsonar.sources=. \
             -Dsonar.java.binaries=target/classes \
-            -Dsonar.host.url="${SONAR_HOST_URL}" \
-            -Dsonar.token="${SONAR_TOKEN}"
+            -Dsonar.host.url="$SONAR_HOST_URL" \
+            -Dsonar.token="$SONAR_TOKEN"
+
+          echo "SonarQube analysis completed successfully!"
 
       # 8. Upload WAR artifact
       - name: Upload WAR artifact
